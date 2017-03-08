@@ -1,0 +1,6 @@
+/registry_browser/obj/**
+/registry_browser/bin/**
+/registry_browser/.vs/**
+/registry_browser/obj/Docker
+/registry_browser/registry_browser/obj
+/registry_browser/registry_browser/bin

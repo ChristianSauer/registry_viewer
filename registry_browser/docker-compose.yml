@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  registry_browser:
+    image: registry_browser
+    build:
+      context: ./registry_browser
+      dockerfile: Dockerfile
