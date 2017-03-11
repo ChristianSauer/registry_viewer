@@ -1,0 +1,20 @@
+﻿@model registry_browser.Pocos.TagDeletedModel
+
+@{
+    ViewBag.Title = $"{Model.Repository}:{Model.Tag} has been removed";
+    Layout = "_Layout";
+}
+
+<h2>@Model.Repository:@Model.Tag has been removed</h2>
+<p>
+    Note that this was a soft delete - only the tag has been removed from the registry.
+    No disk space has been reclaimed.
+    If you want to do that, run a garbage collection on your registry.
+    This is currently (11.03.2017) still poorly implemented by the original garbage collection of the docker registry.
+    Most importantly, the garbage collection will not delete images without tags.
+    This script should work (make a backup of your data first and shut down the registry!):
+    <a href="https://github.com/mortensteenrasmussen/docker-registry-manifest-cleanup">https://github.com/mortensteenrasmussen/docker-registry-manifest-cleanup</a>
+    
+    See for a discussion of this isssue:
+    <a href="https://github.com/docker/distribution/issues/2190">https://github.com/docker/distribution/issues/2190</a>
+</p>

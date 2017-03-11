@@ -1,7 +1,7 @@
-﻿@model registry_browser.Pocos.RepositoryTags
+﻿@model registry_browser.Pocos.RepositoryTagModel
 
 @{
-    ViewBag.Title = $"{Model.name} - Tags";
+    ViewBag.Title = $"{Model.RepositoryTags.name} - Tags";
     Layout = "_Layout";
 }
 
@@ -19,19 +19,18 @@
                 </tr>
             </thead>
             <tbody>
-            @foreach (var tag in Model.tags)
+            @foreach (var tag in Model.RepositoryTags.tags)
             {
                 <tr>
                     <td>@tag</td>
-                    <td><code> docker pull @ViewData["repositoryAddress"]:@tag</code></td>
-                    <td> <a href="@ViewData["manifestAddress"]/@tag">Manifest</a></td>
-                    <td>
-                        <a class="btn btn-danger" href="#" role="button">Link</a>
-                        
+                    <td><code> docker pull @Model.RepositoryAddress:@tag</code></td>
+                    <td> <a href="@Model.ManifestAddress/@tag">Manifest</a></td>
+                    <td>                       
                         <a asp-controller="Home"
                            asp-action="DeleteTag"
-                           asp-route-repository="@repository"
-                           class="btn btn-danger">Delete this Tag</a>
+                           asp-route-repository="@Model.Repository"
+                           asp-route-tag="@tag"
+                           class="btn btn-danger">Delete this Tags</a>
                     </td>
                 </tr>
             }

@@ -1,0 +1,12 @@
+﻿@model registry_browser.Pocos.TagDeletedModel
+
+@{
+    ViewBag.Title = $"{Model.Repository}:{Model.Tag} has not been removed";
+    Layout = "_Layout";
+}
+
+<h2>ERROR: @Model.Repository:@Model.Tag could not be removed </h2>
+<p>
+    Yor registry does not allow deletes.
+    Please allow deletion in the configuration: <a href="https://docs.docker.com/registry/configuration/#delete">https://docs.docker.com/registry/configuration/#delete</a>
+</p>

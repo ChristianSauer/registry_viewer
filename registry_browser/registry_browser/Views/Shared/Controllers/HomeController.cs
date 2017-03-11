@@ -1,31 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using registry_browser.Helpers;
+using registry_browser.Pocos;
 
 namespace registry_browser.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> logger;
-        private readonly string baseAdress;
+        private readonly Uri baseAdress;
 
         public HomeController(ILogger<HomeController> logger)
         {
             this.logger = logger;
-            this.baseAdress = "https://registry.comma-soft.net";
+
+            var url = Environment.GetEnvironmentVariable("REGISTRY_URL");
+            try
+            {
+                this.baseAdress = new Uri(url);
+            }
+            catch (UriFormatException e)
+            {
+                this.logger.LogError(01, e, "Could not Parse the URL {url}. Check environment Variable REGISTRY_URL", url);
+                throw;
+            }
+            catch (ArgumentNullException e)
+            {
+                this.logger.LogError("The Environment Variable REGISTRY_URL cannot be empty!");
+            }
         }
 
         public async Task<IActionResult> Index()
         {
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri(this.baseAdress);
+                client.BaseAddress = this.baseAdress;
                 logger.LogInformation("Using the registry: {registry}", this.baseAdress);
 
                 // todo move this in startup if possible
@@ -46,12 +62,10 @@ namespace registry_browser.Controllers
         }
 
         public async Task<IActionResult> GetRepositoryTags(string repository)
-        {
-            var manifestAddress = $"{this.baseAdress}/v2/{repository}/manifests";
-            ViewData["manifestAddress"] = manifestAddress;
+        {          
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri(this.baseAdress);
+                client.BaseAddress = this.baseAdress;
                 // todo sanitize and check this?
                 var repositoryTagResponse = await client.GetAsync($"/v2/{repository}/tags/list");
                 repositoryTagResponse.EnsureSuccessStatusCode();
@@ -67,16 +81,26 @@ namespace registry_browser.Controllers
                         .ToList();
 
                 var address = RemoveProtocolFromDockerAddress(repository);
-                ViewData["repositoryAddress"] = address;
 
-                return View(repositoryTags);
+                var manifestAddress = $"{this.baseAdress}/v2/{repository}/manifests";
+                var model = new RepositoryTagModel()
+                {
+                    ManifestAddress = manifestAddress,
+                    BaseUri = this.baseAdress,
+                    Repository = repository,
+                    RepositoryTags = repositoryTags,
+                    RepositoryAddress = address
+                    
+                };
 
+
+                return View(model);
             }
         }
 
         private string RemoveProtocolFromDockerAddress(string repository)
         {
-            var address = $"{this.baseAdress.ToLower()}/{repository}";
+            var address = $"{this.baseAdress.ToString().ToLower()}/{repository}";
             address = address.Replace("http://", string.Empty);
             address = address.Replace("https://", string.Empty);
             return address;
@@ -99,6 +123,42 @@ namespace registry_browser.Controllers
         public IActionResult Error()
         {
             return View();
+        }
+
+        public async Task<IActionResult> DeleteTag(string repository, string tag)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = this.baseAdress;
+
+                // get manifest first
+                var manifestResponse = await client.GetAsync($"/v2/{repository}/manifests/{tag}");
+                manifestResponse.EnsureSuccessStatusCode();
+
+                IEnumerable<string> digestHeaders;
+                if (!manifestResponse.Headers.TryGetValues("Docker-Content-Digest", out digestHeaders))
+                {
+                    throw new ArgumentException("The response did not contain a Docker-Content-Digest Header, aborting delete");
+                }
+                var digestHeader = digestHeaders.First();
+
+                this.logger.LogInformation("Trying to delete the digest: {digest}", digestHeader);
+
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.docker.distribution.manifest.v2+json");
+                var deleteResponse = await client.DeleteAsync($"/v2/{repository}/manifests/{digestHeader}");
+                if (deleteResponse.StatusCode == HttpStatusCode.MethodNotAllowed)
+                {
+                    this.logger.LogWarning("Could not delete {repository}:{tag} because the registry does not allow deletes.",
+                        repository, tag);
+
+                    return View("CannotDeleteTag", new TagDeletedModel {Repository = repository, Tag = tag});
+
+                }
+
+                deleteResponse.EnsureSuccessStatusCode();
+
+                return View("TagDeleted", new TagDeletedModel { Repository=repository, Tag=tag} );
+            }
         }
     }
 }

@@ -10,7 +10,9 @@ namespace registry_browser.Pocos
         public Uri BaseUri { get; set; }
 
         public string ManifestAddress { get; set; }
-        public string RepositoryName { get; set; }
+        public string Repository { get; set; }
+
+        public string RepositoryAddress { get; set; }
 
         public RepositoryTags RepositoryTags { get; set; }
     }
