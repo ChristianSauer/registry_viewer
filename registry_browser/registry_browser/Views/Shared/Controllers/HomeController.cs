@@ -23,32 +23,10 @@ namespace registry_browser.Controllers
         {
             var registryOptions = registryOptionsAcessor.Value;
             this.logger = logger;
-            registryOptions.Validate();
+            registryOptions.Validate(logger);
 
-            this.baseAdress = registryOptions.Uri.Match(
-                x => x,
-                x => this.HandleInvalidUri(x, registryOptions));
-
+            this.baseAdress = registryOptions.GetUrlAsrUri();
             this.EnsureRegistryIsReachable(registryOptions);
-        }
-
-        private Uri HandleInvalidUri(Exception ex, RegistryOptions registryOptions)
-        {
-            if (ex is ArgumentNullException)
-            {
-                this.logger.LogError(1, ex, "The Option Registry__Url cannot be empty! Please set the environment variable");
-            }
-            else if (ex is UriFormatException)
-            {
-                this.logger.LogError(2, ex,
-                    $"The Option Registry__Url is malformed, please provide a valid Uri, e.g. http://example.com. The value is:'{registryOptions.Url}'");
-            }
-            else
-            {
-                this.logger.LogError(3, ex, $"Unknown error when trying to format Registry__Url. The value is: {registryOptions.Url}");
-            }
-
-            throw ex;
         }
 
         private void EnsureRegistryIsReachable(Helpers.RegistryOptions registryOptions)
