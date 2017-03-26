@@ -6,7 +6,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Optional.Linq;
 using registry_browser.Helpers;
 using registry_browser.Pocos;
 
@@ -17,23 +19,48 @@ namespace registry_browser.Controllers
         private readonly ILogger<HomeController> logger;
         private readonly Uri baseAdress;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IOptions<RegistryOptions> registryOptionsAcessor)
         {
+            var registryOptions = registryOptionsAcessor.Value;
             this.logger = logger;
+            registryOptions.Validate();
 
-            var url = Environment.GetEnvironmentVariable("REGISTRY_URL");
-            try
+            this.baseAdress = registryOptions.Uri.Match(
+                x => x,
+                x => this.HandleInvalidUri(x, registryOptions));
+
+            this.EnsureRegistryIsReachable(registryOptions);
+        }
+
+        private Uri HandleInvalidUri(Exception ex, RegistryOptions registryOptions)
+        {
+            if (ex is ArgumentNullException)
             {
-                this.baseAdress = new Uri(url);
+                this.logger.LogError(1, ex, "The Option Registry__Url cannot be empty! Please set the environment variable");
             }
-            catch (UriFormatException e)
+            else if (ex is UriFormatException)
             {
-                this.logger.LogError(01, e, "Could not Parse the URL {url}. Check environment Variable REGISTRY_URL", url);
-                throw;
+                this.logger.LogError(2, ex,
+                    $"The Option Registry__Url is malformed, please provide a valid Uri, e.g. http://example.com. The value is:'{registryOptions.Url}'");
             }
-            catch (ArgumentNullException e)
+            else
             {
-                this.logger.LogError("The Environment Variable REGISTRY_URL cannot be empty!");
+                this.logger.LogError(3, ex, $"Unknown error when trying to format Registry__Url. The value is: {registryOptions.Url}");
+            }
+
+            throw ex;
+        }
+
+        private void EnsureRegistryIsReachable(Helpers.RegistryOptions registryOptions)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = this.baseAdress;
+                logger.LogInformation("Using the registry: {registry}", this.baseAdress);
+
+                // todo move this in startup if possible
+                var response = client.GetAsync("/v2/").Result;
+                response.EnsureSuccessStatusCode();
             }
         }
 

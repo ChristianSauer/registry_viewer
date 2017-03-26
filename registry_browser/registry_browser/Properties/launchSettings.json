@@ -19,7 +19,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "REGISTRY_URL": "https://registry.comma-soft.net",
+        "Registry__Url": "https://registry.comma-soft.net",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:52798"

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using Serilog;
 
 namespace registry_browser
@@ -20,6 +22,7 @@ namespace registry_browser
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+
             Configuration = builder.Build();
 
             Log.Logger = new LoggerConfiguration()
@@ -27,6 +30,7 @@ namespace registry_browser
               .WriteTo.ColoredConsole()
               .CreateLogger();
 
+            // this.EnsureRegistryIsReachable(Configuration);
         }
 
         public IConfigurationRoot Configuration { get; }
@@ -36,6 +40,9 @@ namespace registry_browser
         {
             // Add framework services.
             services.AddMvc();
+
+            // Configure using a sub-section of the appsettings.json file.
+            services.Configure<Helpers.RegistryOptions>(Configuration.GetSection("Registry"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
