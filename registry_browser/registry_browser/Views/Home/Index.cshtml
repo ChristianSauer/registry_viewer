@@ -1,13 +1,13 @@
 ﻿@model  registry_browser.Pocos.Repositories
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Registry Viewer: " + ViewData["Repository"];
 }
 
 
 <div class="row">
     <div class="col-md-12">
-        <h2>Available Repositories</h2>
+        <h2>Available Repositories for <a href="@ViewData["Repository"]">@ViewData["Repository"]</a> </h2>
         <div class="list-group">
             @foreach (var repository in Model.repositories)
             {

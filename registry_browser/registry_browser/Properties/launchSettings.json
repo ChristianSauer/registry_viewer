@@ -17,7 +17,6 @@
     },
     "registry_browser": {
       "commandName": "Project",
-      "commandLineArgs": "/Registry:Url=https://registry.comma-soft.net",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

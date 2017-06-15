@@ -61,6 +61,8 @@ namespace registry_browser.Controllers
                 var catalogResponse = await client.GetAsync("/v2/_catalog");
                 catalogResponse.EnsureSuccessStatusCode();
 
+                ViewData["Repository"] = registryOptions.Url;
+
                 var catalog = JsonConvert.DeserializeObject<Pocos.Repositories>(await catalogResponse.Content.ReadAsStringAsync());
 
                 return View(catalog);
