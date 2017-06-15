@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Win32;
 using Serilog;
 
 namespace registry_browser
@@ -23,14 +22,38 @@ namespace registry_browser
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
-            Configuration = builder.Build();
+            AddCommandLineArgsToConfig(builder);
+
+            AddUserSecretsToConfig(env, builder);
 
             Log.Logger = new LoggerConfiguration()
               .Enrich.FromLogContext()
               .WriteTo.ColoredConsole()
               .CreateLogger();
 
-            // this.EnsureRegistryIsReachable(Configuration);
+            Configuration = builder.Build();
+        }
+
+        private static void AddUserSecretsToConfig(IHostingEnvironment env, IConfigurationBuilder builder)
+        {
+            if (env.IsDevelopment())
+            {
+                // For more details on using the user secret store see 
+                // http://go.microsoft.com/fwlink/?LinkID=532709
+                // note that sections are indicated by ":" not by "__" (like envs) or "_"
+                builder.AddUserSecrets<Startup>();
+            }
+        }
+
+        private void AddCommandLineArgsToConfig(IConfigurationBuilder builder)
+        {
+            var commandLineArgs = Environment.GetCommandLineArgs();
+            var commandLineArgsWithoutFirstArg = commandLineArgs.Reverse().Take(commandLineArgs.Length - 1).ToArray();
+
+            if (commandLineArgsWithoutFirstArg.Length > 0)
+            {
+                builder.AddCommandLine(commandLineArgsWithoutFirstArg);
+            }
         }
 
         public IConfigurationRoot Configuration { get; }

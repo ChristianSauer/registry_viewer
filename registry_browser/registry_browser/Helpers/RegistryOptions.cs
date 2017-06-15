@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Logging;
@@ -48,6 +51,25 @@ namespace registry_browser.Helpers
             {
                 this.HandleInvalidUri(ex, logger);
             }
+        }
+
+        public HttpClient AddBasicAuthToClient(HttpClient client)
+        {
+            if (!this.HasBasicAuth())
+            {
+                return client;
+            }
+
+            var credentials = Encoding.ASCII.GetBytes($"{this.User}:{this.Password}");
+
+            var base64String = Convert.ToBase64String(credentials);
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64String);
+            return client;
+        }
+
+        private bool HasBasicAuth()
+        {
+            return !string.IsNullOrWhiteSpace(this.User) & !string.IsNullOrWhiteSpace(this.Password);
         }
 
 

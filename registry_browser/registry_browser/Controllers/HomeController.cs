@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Optional.Linq;
 using registry_browser.Helpers;
 using registry_browser.Pocos;
 
@@ -18,12 +17,13 @@ namespace registry_browser.Controllers
     {
         private readonly ILogger<HomeController> logger;
         private readonly Uri baseAdress;
+        private RegistryOptions registryOptions;
 
         public HomeController(ILogger<HomeController> logger, IOptions<RegistryOptions> registryOptionsAcessor)
         {
-            var registryOptions = registryOptionsAcessor.Value;
+            this.registryOptions = registryOptionsAcessor.Value;
             this.logger = logger;
-            registryOptions.Validate(logger);
+            this.registryOptions.Validate(logger);
 
             this.baseAdress = registryOptions.GetUrlAsrUri();
             this.EnsureRegistryIsReachable(registryOptions);
@@ -46,6 +46,7 @@ namespace registry_browser.Controllers
         {
             using (var client = new HttpClient())
             {
+                registryOptions.AddBasicAuthToClient(client);
                 client.BaseAddress = this.baseAdress;
                 logger.LogInformation("Using the registry: {registry}", this.baseAdress);
 

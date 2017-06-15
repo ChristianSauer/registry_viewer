@@ -17,9 +17,9 @@
     },
     "registry_browser": {
       "commandName": "Project",
+      "commandLineArgs": "/Registry:Url=https://registry.comma-soft.net",
       "launchBrowser": true,
       "environmentVariables": {
-        "Registry__Url": "https://registry.comma-soft.net",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:52798"
