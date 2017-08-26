@@ -5,4 +5,4 @@ services:
     image: registry_browser
     build:
       context: ./registry_browser
-      dockerfile: Dockerfile
+      dockerfile: DockerfileDev
