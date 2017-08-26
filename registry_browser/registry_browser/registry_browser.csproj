@@ -9,12 +9,14 @@
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="bootstrap" Version="4.0.0-alpha6" />
+    <PackageReference Include="bootstrap" Version="4.0.0-beta" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Optional" Version="3.2.0" />
-    <PackageReference Include="Serilog" Version="2.4.0" />
-    <PackageReference Include="Serilog.Extensions.Logging" Version="1.4.1-dev-10147" />
-    <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="2.1.0-dev-00713" />
+    <PackageReference Include="Serilog" Version="2.5.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="Serilog.Sinks.ColoredConsole" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.Literate" Version="3.0.0"/>
+    <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0"/>
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
