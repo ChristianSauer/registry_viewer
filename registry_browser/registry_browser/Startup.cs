@@ -8,43 +8,57 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Serilog;
 
 namespace registry_browser
 {
     public class Startup
     {
-            public Startup(IConfiguration configuration)
-    {
-        Configuration = configuration;
-    }
-
-    public IConfiguration Configuration { get; }
-
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddMvc();
-    }
-
-    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-    {
-        if (env.IsDevelopment())
+        private ILogger _logger;
+        public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
         {
-            app.UseDeveloperExceptionPage();
-        }
-        else
-        {
-            app.UseExceptionHandler("/Home/Error");
+            Configuration = configuration;
+            _logger = loggerFactory.CreateLogger<Startup>();
         }
 
-        app.UseStaticFiles();
+        public IConfiguration Configuration { get; }
 
-        app.UseMvc(routes =>
+        public void ConfigureServices(IServiceCollection services)
         {
-            routes.MapRoute(
-                name: "default",
-                template: "{controller=Home}/{action=Index}/{id?}");
-        });
-    }
+            services.AddMvc();
+
+            var url = Configuration.GetSection("Registry")["Url"];
+            var user = Configuration.GetSection("Registry")["User"];
+            var password = Configuration.GetSection("Registry")["Password"];
+
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                throw new ArgumentNullException("Registry.Url is null. Please provide a valid url using environment variables, commandline or appsettings.json. See readme.md for details");
+            }
+
+            _logger.LogInformation($"Using Registry: {url} User: {user} Password: {new string('*', password.Length)}");
+
+            services.Configure<Helpers.RegistryOptions>(Configuration.GetSection("Registry"));
+        }
+
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
+
+            app.UseStaticFiles();
+
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+            });
+        }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
+using System;
 
 namespace registry_browser
 {
@@ -19,11 +20,12 @@ namespace registry_browser
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
-                    //logging.AddConsole();
 
+                    // todo should be possible to configure this via appsettings.json, but net core 2.0 has some issues apparently.
                     Log.Logger = new LoggerConfiguration().Enrich.FromLogContext().WriteTo.ColoredConsole().CreateLogger();
                     logging.AddSerilog(dispose: true);
-                })
-                .Build();
+                }).Build();
+
+                // todo add registry configuration back in
     }
 }
