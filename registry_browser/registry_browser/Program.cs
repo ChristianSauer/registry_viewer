@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Extensions.Logging;
 using System;
@@ -16,7 +17,10 @@ namespace registry_browser
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+                .UseStartup<Startup>().ConfigureAppConfiguration((hostingContext, config) =>{
+                    // this will add to the configuration from CreateDefaultBuilder
+                    config.AddJsonFile("/config/appsettings.json", optional:true, reloadOnChange:true);
+                })
                 .ConfigureLogging((hostingContext, logging) =>
                 {
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
