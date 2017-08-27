@@ -59,6 +59,7 @@ namespace registry_browser.Controllers
         {          
             using (var client = new HttpClient())
             {
+                registryOptions.AddBasicAuthToClient(client);
                 client.BaseAddress = this.baseAdress;
                 // todo sanitize and check this?
                 var repositoryTagResponse = await client.GetAsync($"/v2/{repository}/tags/list");
@@ -124,7 +125,7 @@ namespace registry_browser.Controllers
             using (var client = new HttpClient())
             {
                 client.BaseAddress = this.baseAdress;
-
+                registryOptions.AddBasicAuthToClient(client);
                 // get manifest first
                 var manifestResponse = await client.GetAsync($"/v2/{repository}/manifests/{tag}");
                 manifestResponse.EnsureSuccessStatusCode();
