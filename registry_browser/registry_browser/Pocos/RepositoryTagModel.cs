@@ -15,5 +15,10 @@ namespace registry_browser.Pocos
         public string RepositoryAddress { get; set; }
 
         public RepositoryTags RepositoryTags { get; set; }
+
+        public string GetCommand(string tag)
+        {
+            return $"docker pull {this.RepositoryAddress}:{tag}";
+        }
     }
 }

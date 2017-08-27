@@ -13,7 +13,8 @@
             <thead>
                 <tr>
                     <th>Tag</th>
-                    <th>Pull</th>
+                    <th>Pull command</th>
+                    <th>Copy to Clipboard</th>
                     <th>Manifest</th>
                     <th>Actions</th>
                 </tr>
@@ -23,7 +24,9 @@
             {
                 <tr>
                     <td>@tag</td>
-                    <td><code> docker pull @Model.RepositoryAddress:@tag</code></td>
+                    @{var cmd = Model.GetCommand(tag);}
+                    <td><code> @cmd </code>  </td>
+                    <td> <button class="rv-copybutton btn btn-link btn-lg glyphicon glyphicon-copy" data-copy="@cmd" title="Copy command to clipboard"></button> </td>
                     <td> <a href="@Model.ManifestAddress/@tag">Manifest</a></td>
                     <td>                       
                         <a asp-controller="Home"

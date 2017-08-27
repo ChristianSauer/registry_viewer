@@ -95,7 +95,8 @@ namespace registry_browser.Controllers
 
         private string RemoveProtocolFromDockerAddress(string repository)
         {
-            var address = $"{this.baseAdress.ToString().ToLower()}/{repository}";
+            var address = new Uri(this.baseAdress, repository).ToString();
+
             address = address.Replace("http://", string.Empty);
             address = address.Replace("https://", string.Empty);
             return address;
