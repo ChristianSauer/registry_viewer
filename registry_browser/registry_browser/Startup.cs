@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using registry_browser.Helpers;
 
 namespace registry_browser
 {
@@ -26,18 +27,35 @@ namespace registry_browser
         {
             services.AddMvc();
 
-            var url = Configuration.GetSection("Registry")["Url"];
+            EnsureRegistryIsReachable();
+
+            services.Configure<Helpers.RegistryOptions>(Configuration.GetSection("Registry"));
+        }
+
+        private void EnsureRegistryIsReachable()
+        {
+             var url = Configuration.GetSection("Registry")["Url"];
             var user = Configuration.GetSection("Registry")["User"];
             var password = Configuration.GetSection("Registry")["Password"];
 
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                throw new ArgumentNullException("Registry.Url is null. Please provide a valid url using environment variables, commandline or appsettings.json. See readme.md for details");
-            }
-
             _logger.LogInformation($"Using Registry: {url} User: {user} Password: {new string('*', password.Length)}");
 
-            services.Configure<Helpers.RegistryOptions>(Configuration.GetSection("Registry"));
+            var options =  new RegistryOptions(){User = user, Password = password, Url = url};
+            options.Validate(this._logger);
+
+            _logger.LogInformation("Trying to connect to the registry");
+
+            try
+            {
+                RegistryConnectionTest.EnsureRegistryIsReachable(options);
+            }
+            catch (System.Exception ex)
+            {   
+                _logger.LogError(9999, ex, "Could not reach the registry. Please check the connection settings");
+                throw new ArgumentException("Registry not reachable, Aborting");
+            }
+
+            _logger.LogInformation("Registry is reachable");
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

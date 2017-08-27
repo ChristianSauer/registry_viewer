@@ -26,22 +26,8 @@ namespace registry_browser.Controllers
             this.registryOptions.Validate(logger);
 
             this.baseAdress = registryOptions.GetUrlAsrUri();
-            this.EnsureRegistryIsReachable(registryOptions);
         }
-
-        private void EnsureRegistryIsReachable(Helpers.RegistryOptions registryOptions)
-        {
-            using (var client = new HttpClient())
-            {
-                client.BaseAddress = this.baseAdress;
-                logger.LogInformation("Using the registry: {registry}", this.baseAdress);
-
-                // todo move this in startup if possible
-                var response = client.GetAsync("/v2/").Result;
-                response.EnsureSuccessStatusCode();
-            }
-        }
-
+        
         public async Task<IActionResult> Index()
         {
             using (var client = new HttpClient())
