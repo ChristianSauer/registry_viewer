@@ -36,13 +36,9 @@ namespace registry_browser.Controllers
                 client.BaseAddress = this.baseAdress;
                 logger.LogInformation("Using the registry: {registry}", this.baseAdress);
 
-                // todo move this in startup if possible
                 var response = await client.GetAsync("/v2/");
                 response.EnsureSuccessStatusCode();
-
-                // todo handle url not reachable
                 // todo handle ssl / no ssl?
-                // todo make registry path configurable, exit in case of error
 
                 var catalogResponse = await client.GetAsync("/v2/_catalog");
                 catalogResponse.EnsureSuccessStatusCode();
